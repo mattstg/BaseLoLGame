@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - RibbitRing
+  - Item
+  - BowerBird
+  - Bower
+  - Mother
+  - Tree
+  - BoostZone
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - TadEggs
+  - PondCage
+  - Frog
+  - Snake
+  - PlayerColiOnly
+  - Player
+  - Fish
+  - Wolf
+  - WolfBlocker
+  - Pond
+  - StreamEffector
+  - RockTree
+  - StreamAffectedCreature
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Ground
+    uniqueID: 2970011111
+    locked: 0
+  - name: Effects
+    uniqueID: 828437909
+    locked: 0
+  - name: Water
+    uniqueID: 3585568583
+    locked: 0
+  - name: Rock
+    uniqueID: 4123448347
+    locked: 0
+  - name: Creatures
+    uniqueID: 1006921303
+    locked: 0
+  - name: TopWater
+    uniqueID: 2327562329
+    locked: 0
+  - name: Bear
+    uniqueID: 504739405
+    locked: 0
+  - name: Trunk
+    uniqueID: 3352461247
+    locked: 0
+  - name: Bush
+    uniqueID: 2960738969
+    locked: 0
+  - name: FlyingCreature
+    uniqueID: 2964990181
+    locked: 0
+  - name: TopAll
+    uniqueID: 2753931947
+    locked: 0
