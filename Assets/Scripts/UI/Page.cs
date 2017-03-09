@@ -6,8 +6,7 @@ using LoLSDK;
 
 public class Page : MonoBehaviour
 {
-    protected PanelManager panelManager;
-    protected Transform pagesParent;
+    public PanelManager panelManager;
 
     public string nextText = "";
     public bool nextTextOverride = false;
@@ -25,6 +24,7 @@ public class Page : MonoBehaviour
 
     public bool useScrollRect = false;
     public bool useScrollbar = false;
+    public bool usePageMask = true;
 
     void Awake()
     {
@@ -74,9 +74,10 @@ public class Page : MonoBehaviour
         hideTitle = hide;
     }
 
-    public void ScrollSettings(bool scrRect, bool scrollbar)
+    public void ScrollSettings(bool scrRect, bool scrollbar, bool pageMask)
     {
         useScrollRect = scrRect;
         useScrollbar = scrollbar;
+        usePageMask = pageMask;
     }
 }
