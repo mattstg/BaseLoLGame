@@ -30,21 +30,6 @@ public class PageLoader : MonoBehaviour
     }
     #endregion
 
-    void Awake()
-    {
-
-    }
-
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-
-    }
-
     public void LoadPages(PanelID panelID, PanelManager panelManager)
     {
         Transform pagesParent = panelManager.pagesParent;

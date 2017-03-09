@@ -8,21 +8,6 @@ public class PanelButton : CanvasButton
 {
     protected PanelManager panelManager;
 
-    protected override void Awake()
-    {
-        base.Awake();
-    }
-
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-
-    }
-
     public void AssignPanelManager(PanelManager _panelManager)
     {
         panelManager = _panelManager;

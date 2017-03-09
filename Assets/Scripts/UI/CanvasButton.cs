@@ -20,7 +20,7 @@ public class CanvasButton : MonoBehaviour
     protected bool isSelected = false;
     protected bool isEnabled = true;
 
-    protected virtual void Awake()
+    void Awake()
     {
         button = gameObject.GetComponent<Button>();
         image = gameObject.GetComponent<Image>();

@@ -28,12 +28,6 @@ public class PanelManager : MonoBehaviour
     private float defaultContentTop = 64f;
     private bool hideTitle = false;
 
-
-    void Awake()
-    {
-        
-    }
-
     void Start()
     {
         if (pagesParent)
@@ -66,11 +60,6 @@ public class PanelManager : MonoBehaviour
             backButton.SetActive(false);
         }
         LoadPanel();
-    }
-
-    void Update()
-    {
-
     }
 
     public void ButtonClicked(PanelButton button)
@@ -133,7 +122,7 @@ public class PanelManager : MonoBehaviour
                 t.gameObject.SetActive(false);
             pagesParent.GetComponentsInChildren<Page>(true, pages);
             foreach (Page p in pages)
-                p.panelManager = this;
+                p.AssignPanelManager(this);
         }
         currentPage = 0;
         PanelFlow();

@@ -6,8 +6,6 @@ using LoLSDK;
 
 public class Page : MonoBehaviour
 {
-    public PanelManager panelManager;
-
     public string nextText = "";
     public bool nextTextOverride = false;
     public bool nextEnabled = true;
@@ -26,19 +24,11 @@ public class Page : MonoBehaviour
     public bool useScrollbar = false;
     public bool usePageMask = true;
 
-    void Awake()
+    protected PanelManager panelManager;
+
+    public void AssignPanelManager(PanelManager _panelManager)
     {
-
-    }
-
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-
+        panelManager = _panelManager;
     }
 
     public virtual bool NextRequested()     // Page children can override button behaviour
