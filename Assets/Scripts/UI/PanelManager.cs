@@ -11,22 +11,27 @@ public class PanelManager : MonoBehaviour
     public Text titleText;
     public RectTransform contentParent;
     public RectTransform pagesParent;
-    private Image ppImage;
-    private ScrollRect ppScrollRect;
-    private Mask ppMask;
-    public Scrollbar scrollbar;
     public RectTransform buttonsParent;
+    public Scrollbar scrollbar;
     public PanelButton nextButton;
     public PanelButton backButton;
+    public PanelButton infoButton;
+    public Text infoText;
 
     private List<Page> pages = new List<Page>();
     private int currentPage = 0;
 
+    private RectTransform infoParent;
+    private Image ppImage;
+    private ScrollRect ppScrollRect;
+    private Mask ppMask;
+
+    private string defaultTitleText = "";
     private string defaultNextButtonText = "";
     private string defaultBackButtonText = "";
-    private string defaultTitleText = "";
+    private string defaultInfoText = "";
     private float defaultContentTop = 64f;
-    private bool hideTitle = false;
+    private bool titleActive = true;
 
     void Start()
     {
@@ -36,20 +41,16 @@ public class PanelManager : MonoBehaviour
             ppScrollRect = pagesParent.GetComponent<ScrollRect>();
             ppMask = pagesParent.GetComponent<Mask>();
         }
-        if (nextButton)
-            defaultNextButtonText = nextButton.text.text;
-        if (backButton)
-            defaultBackButtonText = backButton.text.text;
-        if (titleText)
-            defaultTitleText = titleText.text;
         if (contentParent)
             defaultContentTop = Mathf.Floor((contentParent.sizeDelta.y / 2f + contentParent.anchoredPosition.y) * -1f);
-
+        if (titleText)
+            defaultTitleText = titleText.text;
         if (nextButton)
         {
             nextButton.AssignPanelManager(this);
             nextButton.SetMode(false, false);
             nextButton.InitializeState(false, true);
+            defaultNextButtonText = nextButton.text.text;
             nextButton.SetActive(true);
         }
         if (backButton)
@@ -57,8 +58,24 @@ public class PanelManager : MonoBehaviour
             backButton.AssignPanelManager(this);
             backButton.SetMode(false, false);
             backButton.InitializeState(false, true);
+            defaultBackButtonText = backButton.text.text;
             backButton.SetActive(false);
         }
+        if (infoButton)
+        {
+            infoButton.AssignPanelManager(this);
+            infoButton.SetMode(true, true);
+            infoButton.InitializeState(false, true);
+            infoParent = (RectTransform)infoButton.transform.parent;
+            infoButton.SetActive(true);
+        }
+        if (infoText)
+        {
+            defaultInfoText = infoText.text;
+            infoText.gameObject.SetActive(false);
+        }
+        if (infoParent)
+            infoParent.gameObject.SetActive(false);
         LoadPanel();
     }
 
@@ -80,12 +97,14 @@ public class PanelManager : MonoBehaviour
 
     public void ButtonSelected(PanelButton button)
     {
-
+        if (button == infoButton)
+            InfoOn();
     }
 
     public void ButtonDeselected(PanelButton button)
     {
-
+        if (button == infoButton)
+            InfoOff();
     }
 
     public void Next()
@@ -108,21 +127,35 @@ public class PanelManager : MonoBehaviour
         }
     }
 
+    public void InfoOn()
+    {
+        if (infoText)
+            infoText.gameObject.SetActive(true);
+    }
+
+    public void InfoOff()
+    {
+        if (infoText)
+            infoText.gameObject.SetActive(false);
+    }
+
     public void LoadPanel()
     {
         if (panelID != PanelID.None && Enum.IsDefined(typeof(PanelID), panelID))
-        {
+        {                                           // use PageLoader to generate pages
             ClearPanel();
-            PageLoader.Instance.LoadPages(panelID, this);
+            pages = PageLoader.Instance.LoadPages(panelID, this);
         }
-        else        // use preexisting Pages in pagesParent, instead of using PageLoader to generate Pages
-        {
+        else
+        {                                           // use preexisting Pages in pagesParent
             panelID = PanelID.None;
-            foreach (Transform t in pagesParent)
-                t.gameObject.SetActive(false);
             pagesParent.GetComponentsInChildren<Page>(true, pages);
-            foreach (Page p in pages)
-                p.AssignPanelManager(this);
+            int pagesCount = pages.Count;
+            for (int i = 0; i < pagesCount; i++)
+            {
+                pages[i].AssignPanelManager(this);
+                pages[i].SetPageNumber(i, pagesCount);
+            }
         }
         currentPage = 0;
         PanelFlow();
@@ -164,9 +197,14 @@ public class PanelManager : MonoBehaviour
             {
                 ApplyPageSettings(pages[i]);
                 pages[i].gameObject.SetActive(true);
+                pages[i].PageOpened();
             }
             else
+            {
+                if (pages[i].IsOpen())
+                    pages[i].PageClosed();
                 pages[i].gameObject.SetActive(false);
+            }
         }
         if (currentPage == 0)
             backButton.SetActive(false);
@@ -174,23 +212,23 @@ public class PanelManager : MonoBehaviour
             backButton.SetActive(true);
     }
 
-    public void HideTitle(bool becomesHidden)
+    public void SetTitleActive(bool becomesActive)
     {
-        if (becomesHidden != hideTitle)
+        if (becomesActive != titleActive)
         {
-            if (becomesHidden)
-            {
-                titleText.transform.parent.gameObject.SetActive(false);
-                contentParent.sizeDelta = new Vector2(contentParent.sizeDelta.x, contentParent.sizeDelta.y + defaultContentTop);
-                contentParent.anchoredPosition = new Vector2(contentParent.anchoredPosition.x, contentParent.anchoredPosition.y + (defaultContentTop / 2));
-            }
-            else
+            if (becomesActive)
             {
                 titleText.transform.parent.gameObject.SetActive(true);
                 contentParent.sizeDelta = new Vector2(contentParent.sizeDelta.x, contentParent.sizeDelta.y - defaultContentTop);
-                contentParent.anchoredPosition = new Vector2(contentParent.anchoredPosition.x, contentParent.anchoredPosition.y - (defaultContentTop / 2));
+                contentParent.anchoredPosition = new Vector2(contentParent.anchoredPosition.x, contentParent.anchoredPosition.y - (defaultContentTop / 2f));
             }
-            hideTitle = becomesHidden;
+            else
+            {
+                titleText.transform.parent.gameObject.SetActive(false);
+                contentParent.sizeDelta = new Vector2(contentParent.sizeDelta.x, contentParent.sizeDelta.y + defaultContentTop);
+                contentParent.anchoredPosition = new Vector2(contentParent.anchoredPosition.x, contentParent.anchoredPosition.y + (defaultContentTop / 2f));
+            }
+            titleActive = becomesActive;
         }
     }
 
@@ -198,26 +236,6 @@ public class PanelManager : MonoBehaviour
     {
         if (!p)
             return;
-        if (p.nextTextOverride)
-            nextButton.SetText(p.nextText);
-        else
-            nextButton.SetText(defaultNextButtonText);
-        nextButton.SetEnabled(p.nextEnabled);
-        nextButton.SetActive(p.nextActive);
-
-        if (p.backTextOverride)
-            backButton.SetText(p.backText);
-        else
-            backButton.SetText(defaultBackButtonText);
-        backButton.SetEnabled(p.backEnabled);
-        backButton.SetActive(p.backActive);
-
-        if (p.titleTextOverride)
-            titleText.text = p.titleText;
-        else
-            titleText.text = defaultTitleText;
-
-        HideTitle(p.hideTitle);
 
         if (ppScrollRect)
             ppScrollRect.content = (RectTransform)p.transform;
@@ -249,6 +267,35 @@ public class PanelManager : MonoBehaviour
             ppImage.color = c;
             ppMask.enabled = false;
         }
+
+        SetTitleActive(p.titleActive);
+        if (p.titleTextOverride)
+            titleText.text = p.titleText;
+        else
+            titleText.text = defaultTitleText;
+
+        nextButton.SetActive(p.nextActive);
+        nextButton.SetEnabled(p.nextEnabled);
+        if (p.nextTextOverride)
+            nextButton.SetText(p.nextText);
+        else
+            nextButton.SetText(defaultNextButtonText);
+
+        backButton.SetActive(p.backActive);
+        backButton.SetEnabled(p.backEnabled);
+        if (p.backTextOverride)
+            backButton.SetText(p.backText);
+        else
+            backButton.SetText(defaultBackButtonText);
+
+        infoParent.gameObject.SetActive(p.infoActive);
+        infoButton.SetEnabled(p.infoEnabled);
+        infoButton.SetSelected(false);
+        if (p.infoTextOverride)
+            infoText.text = p.infoText;
+        else
+            infoText.text = defaultInfoText;
+        infoText.gameObject.SetActive(false);
     }
 
     public int GetCurrentPage()

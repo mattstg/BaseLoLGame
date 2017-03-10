@@ -6,29 +6,84 @@ using LoLSDK;
 
 public class Page : MonoBehaviour
 {
-    public string nextText = "";
-    public bool nextTextOverride = false;
-    public bool nextEnabled = true;
-    public bool nextActive = true;
-
-    public string backText = "";
-    public bool backTextOverride = false;
-    public bool backEnabled = true;
-    public bool backActive = true;
-
-    public string titleText = "";
-    public bool titleTextOverride = false;
-    public bool hideTitle = false;
-
     public bool useScrollRect = false;
     public bool useScrollbar = false;
     public bool usePageMask = true;
 
-    protected PanelManager panelManager;
+    public bool titleActive = true;
+    public bool titleTextOverride = false;
+    public string titleText = "";
 
-    public void AssignPanelManager(PanelManager _panelManager)
+    public bool nextActive = true;
+    public bool nextEnabled = true;
+    public bool nextTextOverride = false;
+    public string nextText = "";
+
+    public bool backActive = true;
+    public bool backEnabled = true;
+    public bool backTextOverride = false;
+    public string backText = "";
+
+    public bool infoActive = false;
+    public bool infoEnabled = true;
+    public bool infoTextOverride = false;
+    public string infoText = "";
+
+    protected PanelManager panelManager;
+    protected RectTransform pageParent;
+    protected int pageNumber = 0;
+    protected int pagesCount = 1;
+    [HideInInspector]
+    public Text text;
+    [HideInInspector]
+    public Image image;
+
+    protected bool isOpen = false;
+
+    protected virtual void Awake()
+    {
+        text = gameObject.GetComponent<Text>();
+        image = gameObject.GetComponent<Image>();
+    }
+
+    protected virtual void Start()
+    {
+        pageParent = (RectTransform)transform.parent;
+        if (useScrollRect)
+            InitiateScroll();
+    }
+
+    public virtual void AssignPanelManager(PanelManager _panelManager)
     {
         panelManager = _panelManager;
+    }
+
+    public void InitiateScroll()
+    {
+        ScrollRect sr = pageParent.GetComponent<ScrollRect>();
+        if (sr)
+            sr.verticalNormalizedPosition = 1;
+    }
+
+    public virtual void PageOpened()
+    {
+        isOpen = true;
+    }
+
+    public virtual void PageClosed()
+    {
+        isOpen = false;
+    }
+
+    public bool IsOpen()
+    {
+        return isOpen;
+    }
+
+    public void SetPageNumber(int _pageNumber, int _pagesCount)
+    {
+        pageNumber = _pageNumber;
+        pagesCount = _pagesCount;
     }
 
     public virtual bool NextRequested()     // Page children can override button behaviour
@@ -41,33 +96,81 @@ public class Page : MonoBehaviour
         return true;
     }
 
-    public void NextSettings(string text, bool textOverride, bool enabled, bool active)
-    {
-        nextText = text;
-        nextTextOverride = textOverride;
-        nextEnabled = enabled;
-        nextActive = active;
-    }
-
-    public void BackSettings(string text, bool textOverride, bool enabled, bool active)
-    {
-        backText = text;
-        backTextOverride = textOverride;
-        backEnabled = enabled;
-        backActive = active;
-    }
-
-    public void TitleSettings(string text, bool textOverride, bool hide)
-    {
-        titleText = text;
-        titleTextOverride = textOverride;
-        hideTitle = hide;
-    }
-
     public void ScrollSettings(bool scrRect, bool scrollbar, bool pageMask)
     {
         useScrollRect = scrRect;
         useScrollbar = scrollbar;
         usePageMask = pageMask;
+    }
+
+    public void TitleSettings(bool active, bool textOverride, string text)
+    {
+        titleActive = active;
+        titleTextOverride = textOverride;
+        titleText = text;
+    }
+
+    public void NextSettings(bool active, bool enabled, bool textOverride, string text)
+    {
+        nextActive = active;
+        nextEnabled = enabled;
+        nextTextOverride = textOverride;
+        nextText = text;
+    }
+
+    public void BackSettings(bool active, bool enabled, bool textOverride, string text)
+    {
+        backActive = active;
+        backEnabled = enabled;
+        backTextOverride = textOverride;
+        backText = text;
+    }
+
+    public void InfoSettings(bool active, bool enabled, bool textOverride, string text)
+    {
+        infoActive = active;
+        infoEnabled = enabled;
+        infoTextOverride = textOverride;
+        infoText = text;
+    }
+
+    public virtual void SetTextContent(string str)
+    {
+        if (text)
+            text.text = str;
+    }
+
+    public void SetTextAlignment(TextAnchor alignment)
+    {
+        if (text)
+            text.alignment = alignment;
+    }
+
+    public void SetTextSize(int fontSize)
+    {
+        if (text)
+        {
+            text.fontSize = fontSize;
+            text.resizeTextMaxSize = fontSize;
+        }
+    }
+
+    public void SetImageContent(Sprite sprite)
+    {
+        if (image)
+            image.sprite = sprite;
+        AspectRatioMatch arm = gameObject.GetComponent<AspectRatioMatch>();
+        if (arm)
+            arm.UpdateAspectRatio();
+    }
+
+    public void SetImageAlpha(float alpha)
+    {
+        if (image)
+        {
+            Color c = image.color;
+            c.a = alpha;
+            image.color = c;
+        }
     }
 }

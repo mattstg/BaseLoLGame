@@ -30,17 +30,6 @@ public class CanvasButton : MonoBehaviour
         InitializeState(isSelected, isEnabled);
     }
 
-    void Start()
-    {
-
-    }	
-
-    void Update()
-    {
-
-    }
-
-
     public void SetMode(bool _canSelect, bool _canToggle)
     {
         if (_canToggle && !_canSelect)
@@ -112,19 +101,23 @@ public class CanvasButton : MonoBehaviour
 
     public void SetText(string str)
     {
-        text.text = str;
+        if (text)
+            text.text = str;
     }
 
     public void SetEnabled(bool becomesEnabled)
     {
         isEnabled = becomesEnabled;
         button.interactable = isEnabled;
-        Color newColor = text.color;
-        if (isEnabled)
-            newColor.a = 1f;
-        else
-            newColor.a = 0.5f;
-        text.color = newColor;
+        if (text)
+        {
+            Color newColor = text.color;
+            if (isEnabled)
+                newColor.a = 1f;
+            else
+                newColor.a = 0.5f;
+            text.color = newColor;
+        }
     }
 
     public void SetActive(bool isActive)
