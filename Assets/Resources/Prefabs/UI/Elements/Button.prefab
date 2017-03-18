@@ -85,12 +85,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1e22cbfeb748c54194a7b990a28cf0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvasManager: {fileID: 0}
   selectedSprite: {fileID: 21300000, guid: 75d4abffbb46a9c4d9182e7e74ac3b1c, type: 3}
   button: {fileID: 0}
   image: {fileID: 0}
   text: {fileID: 0}
   canSelect: 0
   canToggle: 0
+  clickAudio: 0
 --- !u!114 &114822070528610256
 MonoBehaviour:
   m_ObjectHideFlags: 1

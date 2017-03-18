@@ -30,7 +30,7 @@ public class Page : MonoBehaviour
     public string infoText = "";
 
     protected PanelManager panelManager;
-    protected RectTransform pageParent;
+    protected RectTransform pagesParent;
     protected int pageNumber = 0;
     protected int pagesCount = 1;
     [HideInInspector]
@@ -48,7 +48,6 @@ public class Page : MonoBehaviour
 
     protected virtual void Start()
     {
-        pageParent = (RectTransform)transform.parent;
         if (useScrollRect)
             InitiateScroll();
     }
@@ -56,11 +55,15 @@ public class Page : MonoBehaviour
     public virtual void AssignPanelManager(PanelManager _panelManager)
     {
         panelManager = _panelManager;
+        if (!pagesParent && panelManager.pagesParent)
+            pagesParent = panelManager.pagesParent;
     }
 
     public void InitiateScroll()
     {
-        ScrollRect sr = pageParent.GetComponent<ScrollRect>();
+        if (!pagesParent)
+            pagesParent = (RectTransform)transform.parent;
+        ScrollRect sr = pagesParent.GetComponent<ScrollRect>();
         if (sr)
             sr.verticalNormalizedPosition = 1;
     }

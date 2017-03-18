@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using LoLSDK;
 
 public enum CascadeTextStatus{Ready, Writing, Finished};
-public enum IfExceedsParent{BestFitFontSize, ExtendDownward};
+public enum IfExceedsPage{BestFitFontSize, ExtendDownward};
 
 public class CascadeTextPage : Page
 {
@@ -23,7 +23,7 @@ public class CascadeTextPage : Page
     private float timeElapsed = 0f;
     protected CascadeTextStatus status = CascadeTextStatus.Ready;
 
-    public IfExceedsParent ifExceedsParent = IfExceedsParent.BestFitFontSize;
+    public IfExceedsPage ifExceedsPage = IfExceedsPage.BestFitFontSize;
     public bool autoScroll = true;
     public float smoothTime = 3f;
     public float offset = 0f;
@@ -31,7 +31,9 @@ public class CascadeTextPage : Page
     private float targetPos = 0f;
 
     private float pDeltaVelocity = 0f;
-    
+    private Vector2 previousParentDimensions;
+    private int originalFontSize = 26;
+    private bool fontResized = false;
 
 
     protected override void Awake()
@@ -41,12 +43,14 @@ public class CascadeTextPage : Page
             text = textTransform.GetComponent<Text>();
         else
             text = GetComponentInChildren<Text>();
+        originalFontSize = text.fontSize;
         pageTransform = (RectTransform)transform;
     }
 
-    protected override void Start()
+    public override void AssignPanelManager(PanelManager _panelManager)
     {
-        pageParent = (RectTransform)transform.parent;
+        base.AssignPanelManager(_panelManager);
+        buttonsParent = panelManager.buttonsParent;
     }
 
     void Update()
@@ -71,10 +75,8 @@ public class CascadeTextPage : Page
         {
 
         }
-        if (autoScroll)
-            UpdateTextPosition();
-        else
-            textTransform.anchoredPosition = new Vector2(0, 0);
+
+        UpdateTextPosition();
     }
 
     public void HandleTags()
@@ -120,33 +122,75 @@ public class CascadeTextPage : Page
 
     public void UpdateTextPosition()
     {
-        float parentHeight = pageParent.rect.height;
-        float pageHeight = pageTransform.rect.height;
+        Vector2 parentDimensions = new Vector2(pagesParent.rect.width, pagesParent.rect.height);
+        float pageHeight = 0f;
         float textHeight = textTransform.sizeDelta.y;
         float pDeltaTarget = 0f;
-
-        if (textHeight > pageHeight)
+        bool resized = (parentDimensions != previousParentDimensions);
+        if (fontResized)
         {
-            if (ifExceedsParent == IfExceedsParent.BestFitFontSize)
-            {
-                text.fontSize--;
-            }
-            else if (ifExceedsParent == IfExceedsParent.ExtendDownward)
-            {
-                pDeltaTarget = textHeight - parentHeight;
-            }
+            resized = true;
+            fontResized = false;
         }
 
-        targetPos = (textHeight / 2f) - (pageHeight / 2f) + offset;
-
-        if (targetPos > 0)
-            targetPos = 0;
-
-        textTransform.anchoredPosition = new Vector2(0, Mathf.SmoothDamp(textTransform.anchoredPosition.y, targetPos, ref velocity, smoothTime));
-        if (ifExceedsParent == IfExceedsParent.ExtendDownward)
-            pageTransform.sizeDelta = new Vector2(0, Mathf.SmoothDamp(pageTransform.sizeDelta.y, pDeltaTarget, ref pDeltaVelocity, 0.5f));
-        else
+        if (ifExceedsPage == IfExceedsPage.BestFitFontSize)
+        {
             pageTransform.sizeDelta = new Vector2(0, 0);
+            pageHeight = pageTransform.rect.height;
+            if (textHeight > pageHeight && text.fontSize > 8)
+            {
+                text.fontSize--;
+                //resized = true;
+                fontResized = true;
+            }
+            if (textHeight < pageHeight - 100 && text.fontSize < originalFontSize)
+            {
+                text.fontSize++;
+                //resized = true;
+                fontResized = true;
+            }
+        }
+        else if (ifExceedsPage == IfExceedsPage.ExtendDownward)
+        {
+            if (textHeight > parentDimensions.y)
+            {
+                pDeltaTarget = textHeight - parentDimensions.y;
+                if (textHeight > pageHeight)
+                    pageTransform.sizeDelta = new Vector2(0, Mathf.SmoothDamp(pageTransform.sizeDelta.y, pDeltaTarget, ref pDeltaVelocity, 0.5f));
+                else if (textHeight < pageHeight)
+                    pageTransform.sizeDelta = new Vector2(0, pDeltaTarget);
+            }
+            else
+            {
+                pageTransform.sizeDelta = new Vector2(0, 0);
+            }
+        }
+        pageHeight = pageTransform.rect.height;
+        textHeight = textTransform.sizeDelta.y;
+
+        if (autoScroll)
+        {
+            targetPos = (textHeight / 2f) - (pageHeight / 2f) + offset;
+
+            if (targetPos > 0)
+                targetPos = 0;
+
+            if (resized)
+            {
+                textTransform.anchoredPosition = new Vector2(0, targetPos);
+                velocity = 0f;
+            }
+            else
+            {
+                textTransform.anchoredPosition = new Vector2(0, Mathf.SmoothDamp(textTransform.anchoredPosition.y, targetPos, ref velocity, smoothTime));
+            }
+        }
+        else
+        {
+            textTransform.anchoredPosition = new Vector2(0, 0);
+        }
+
+        previousParentDimensions = parentDimensions;
     }
 
     public void InitializeTextPosition()
@@ -154,13 +198,13 @@ public class CascadeTextPage : Page
         if (autoScroll)
         {
             float pageHeight = pageTransform.rect.height;
-            //float textHeight = textTransform.sizeDelta.y;
-            targetPos = 17f - (pageHeight / 2f) + offset;
+            targetPos = offset - (pageHeight / 2f);
             textTransform.anchoredPosition = new Vector2(0, targetPos);
             velocity = 0f;
         }
         else
             textTransform.anchoredPosition = new Vector2(0, 0);
+        previousParentDimensions = new Vector2(pagesParent.rect.width, pagesParent.rect.height);
     }
 
     public override void SetTextContent(string str)
@@ -171,12 +215,6 @@ public class CascadeTextPage : Page
         currentCharacter = 0;
         timeElapsed = 0f;
         status = CascadeTextStatus.Ready;
-    }
-
-    public override void AssignPanelManager(PanelManager _panelManager)
-    {
-        base.AssignPanelManager(_panelManager);
-        buttonsParent = panelManager.buttonsParent;
     }
 
     public override void PageOpened()
@@ -204,5 +242,15 @@ public class CascadeTextPage : Page
             if (buttonsParent)
                 buttonsParent.gameObject.SetActive(true);
         }
+    }
+
+    public void CascadeTextSettings(float charactersPerSecond, bool autoScroll, float smoothTime, IfExceedsPage ifExceedsPage)
+    {
+        this.charactersPerSecond = charactersPerSecond;
+        this.autoScroll = autoScroll;
+        this.smoothTime = smoothTime;
+        this.ifExceedsPage = ifExceedsPage;
+        if (this.ifExceedsPage == IfExceedsPage.BestFitFontSize)
+            usePageMask = false;
     }
 }

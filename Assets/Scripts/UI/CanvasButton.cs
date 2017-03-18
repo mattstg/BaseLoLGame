@@ -6,6 +6,7 @@ using LoLSDK;
 
 public class CanvasButton : MonoBehaviour
 {
+    public CanvasManager canvasManager;
     public Sprite selectedSprite;
     protected Sprite defaultSprite;
     [HideInInspector]
@@ -17,11 +18,14 @@ public class CanvasButton : MonoBehaviour
 
     public bool canSelect = false;
     public bool canToggle = false;  // canToggle = can deselect by clicking when selected
+    public bool clickAudio = false;
     protected bool isSelected = false;
     protected bool isEnabled = true;
 
     void Awake()
     {
+        if (!canvasManager & clickAudio)
+            canvasManager = GetComponentInParent<CanvasManager>();
         button = gameObject.GetComponent<Button>();
         image = gameObject.GetComponent<Image>();
         text = gameObject.GetComponentInChildren<Text>();
@@ -57,15 +61,17 @@ public class CanvasButton : MonoBehaviour
             bool becomesSelected = true;
             if (canToggle && isSelected)
                 becomesSelected = false;
-            SetSelected(becomesSelected);
+            SetSelected(becomesSelected, true);
         }
         else
         {
-            WasClicked();
+            WasClicked(true);
         }
+        if (clickAudio)
+            canvasManager.PlayAudio(UISoundEffect.Click);
     }
 
-    public void SetSelected(bool becomesSelected)
+    public void SetSelected(bool becomesSelected, bool directAction)
     {
         if (isSelected != becomesSelected && canSelect)
         {
@@ -73,13 +79,13 @@ public class CanvasButton : MonoBehaviour
             {
                 image.sprite = selectedSprite;
                 isSelected = true;
-                BecameSelected();
+                BecameSelected(directAction);
             }
             else
             {
                 image.sprite = defaultSprite;
                 isSelected = false;
-                BecameDeselected();
+                BecameDeselected(directAction);
             }
         }
         if (!canSelect)
@@ -88,16 +94,16 @@ public class CanvasButton : MonoBehaviour
             if (isSelected)
             {
                 isSelected = false;
-                BecameDeselected();
+                BecameDeselected(directAction);
             }
         }
     }
 
-    protected virtual void WasClicked() { }
+    protected virtual void WasClicked(bool directAction) { }
 
-    protected virtual void BecameSelected() { }
+    protected virtual void BecameSelected(bool directAction) { }
 
-    protected virtual void BecameDeselected() { }
+    protected virtual void BecameDeselected(bool directAction) { }
 
     public void SetText(string str)
     {
@@ -130,12 +136,12 @@ public class CanvasButton : MonoBehaviour
         return text.text;
     }
     
-    public bool GetSelected()
+    public bool IsSelected()
     {
         return isSelected;
     }
 
-    public bool GetEnabled()
+    public bool IsEnabled()
     {
         return isEnabled;
     }

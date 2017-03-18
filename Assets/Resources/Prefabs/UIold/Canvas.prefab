@@ -124,7 +124,6 @@ GameObject:
   - component: {fileID: 224958356663262982}
   - component: {fileID: 222940226731596722}
   - component: {fileID: 114604646479730552}
-  - component: {fileID: 114099454210030328}
   m_Layer: 5
   m_Name: AbilityBar
   m_TagString: Untagged
@@ -578,18 +577,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &114099454210030328
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1167568434510004}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec5845fd98f23a94f9795d03ac8d1fce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  abilityBar: {fileID: 114604646479730552}
 --- !u!114 &114099546909513582
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -8,11 +8,13 @@ public class AspectRatioMatch : MonoBehaviour
 {
     public Image image;
     public AspectRatioFitter aspectRF;
+    public Page page;
 
     void Start()
     {
         UpdateAspectRatio();
-        gameObject.GetComponent<Page>().InitiateScroll();
+        if (page)
+            page.InitiateScroll();
     }
 
     public void UpdateAspectRatio()

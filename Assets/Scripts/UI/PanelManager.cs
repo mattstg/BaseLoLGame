@@ -33,6 +33,9 @@ public class PanelManager : MonoBehaviour
     private float defaultContentTop = 64f;
     private bool titleActive = true;
 
+    public delegate void ClosePanelCallback();
+    private ClosePanelCallback closePanelCallback;
+
     void Start()
     {
         if (pagesParent)
@@ -76,8 +79,11 @@ public class PanelManager : MonoBehaviour
         }
         if (infoParent)
             infoParent.gameObject.SetActive(false);
-        LoadPanel();
+        LoadPanel(Empty);
     }
+
+    public void Empty() { } // just for development, while LoadPanel(CPC) is
+                            // called here from Start() instead of from GameFlow
 
     public void ButtonClicked(PanelButton button)
     {
@@ -139,8 +145,9 @@ public class PanelManager : MonoBehaviour
             infoText.gameObject.SetActive(false);
     }
 
-    public void LoadPanel()
+    public void LoadPanel(ClosePanelCallback callback)
     {
+        closePanelCallback = callback;
         if (panelID != PanelID.None && Enum.IsDefined(typeof(PanelID), panelID))
         {                                           // use PageLoader to generate pages
             ClearPanel();
@@ -158,6 +165,7 @@ public class PanelManager : MonoBehaviour
             }
         }
         currentPage = 0;
+        OpenPanel();
         PanelFlow();
     }
 
@@ -177,6 +185,7 @@ public class PanelManager : MonoBehaviour
     public void ClosePanel()
     {
         gameObject.SetActive(false);
+        closePanelCallback();
     }
 
     public virtual void PanelFlow()
@@ -290,7 +299,7 @@ public class PanelManager : MonoBehaviour
 
         infoParent.gameObject.SetActive(p.infoActive);
         infoButton.SetEnabled(p.infoEnabled);
-        infoButton.SetSelected(false);
+        infoButton.SetSelected(false, false);
         if (p.infoTextOverride)
             infoText.text = p.infoText;
         else

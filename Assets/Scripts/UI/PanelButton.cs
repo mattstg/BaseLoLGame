@@ -13,19 +13,19 @@ public class PanelButton : CanvasButton
         panelManager = _panelManager;
     }
 
-    protected override void WasClicked()
+    protected override void WasClicked(bool directAction)
     {
         if (panelManager)
             panelManager.ButtonClicked(this);
     }
 
-    protected override void BecameSelected()
+    protected override void BecameSelected(bool directAction)
     {
         if (panelManager)
             panelManager.ButtonSelected(this);
     }
 
-    protected override void BecameDeselected()
+    protected override void BecameDeselected(bool directAction)
     {
         if (panelManager)
             panelManager.ButtonDeselected(this);
